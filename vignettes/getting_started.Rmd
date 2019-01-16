@@ -1,0 +1,70 @@
+---
+title: "Getting started"
+author: "Jean Philippe Wan"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# Introduction
+rCANSIM packages provides an easy to use querying system for CANSIM metadata. The use of the querying functions allows the creation of *smart tools*. For example, the `smart_merge_pairwise()` allows a semi interactive merging of two CANSIM tables i.e. the package will take care of checking for the dimensions and fields and will *guess* on what the optimal merge and inform the user of the other available choices for merging. The user then decides on what actions to take.
+
+rCANSIM loads the metadata in an environment internal to the package in order not to pollute the global environment. This means that getting objects from that enviroment require a getter functions. No setter function has been added to preserve the integrity of the environment.
+
+# Getting Started
+We load and attach the library
+```{r}
+library(rCANSIM)
+```
+
+The next step is to create a repository for the metadata.csv files that comes zipped with the CANSIM downloads.
+```{r, cache= TRUE}
+create_meta_directory("R:/DATA/CANSIM/TEST_DL/Downloads/CANSIM_TABLES", "C:/Users/jpwan/Desktop/meta_test")
+```
+The first parameter represents the source file where the downloaded zip files are stored. The second parameter is the destination.  In our case, we loaded all the labour related CANSIM tables but the user can load an arbitrary number of metadata files since the package load all the files from the source destination.
+
+We then set the meta directory.
+```{r}
+set_meta_directory("C:/Users/jpwan/Desktop/meta_test")
+```
+This step will also cause a few packages to load. These are common packages and would usually be loaded and attached by the user.
+
+As long as the metadata remains unchanged, we only need to set the meta directory without having to call the `create_meta_directory()` function first.
+
+The following command allows us to see all the functions that are exported from the package in alphabetial order.
+```{r}
+ls(envir= as.environment("package:rCANSIM")) %>% sort()
+```
+
+A brief description of each function can be found by using the `help()` function or `?`. The results will be displayed in the help menu of `r`
+```{r}
+help(apply_alias)
+
+?apply_alias
+```
+
+As mention previously, an internal environment to the package is used to house the metadata. This method keeps the global environment clean for the user and has the added benefit of creating a hashmap to allow 0(1) access to the metadata tables. 
+
+To be able to view the list of tables, we do
+```{r}
+ls_environment()
+```
+
+The `meta` object contains the general information about the table such as name, etc. The numeric part of each object represent the Product ID (PID) assigned by Statscan. The objects with the `dim` suffix contains information relating to the dimension of the CANSIM table. Finally, the objects with the `var` contains the attributes or fields of each dimension for a particular PID.
+
+To be able to bring one of the objects to the global environment to allow manipulation, we use 
+```{r}
+obj <- get_object_rCANSIM("14100370_dim")
+str(obj)
+```
+
